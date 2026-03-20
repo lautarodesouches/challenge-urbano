@@ -50,7 +50,7 @@ services:
     working_dir: /app
     volumes:
       - ./front:/app
-    command: sh -c "echo 'Frontend placeholder - Pending React App' && tail -f /dev/null"
+    command: pnpm dev
     ports:
       - "3001:3000"
 
