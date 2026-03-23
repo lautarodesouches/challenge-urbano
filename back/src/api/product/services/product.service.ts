@@ -21,6 +21,12 @@ export class ProductService {
     private readonly eventEmitter: EventEmitter2,
   ) { }
 
+  async getProducts() {
+    return this.entityManager.find(Product, {
+      order: { id: 'DESC' },
+    });
+  }
+
   async getProduct(productId: number) {
     const product = await this.entityManager.findOne(Product, {
       where: {
