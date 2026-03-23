@@ -8,8 +8,8 @@ import {
   JoinTable,
   OneToMany,
 } from 'typeorm';
-import { Product } from './product.entity';
 import { Role } from './role.entity';
+import type { Product } from './product.entity';
 
 @Entity()
 export class User {
@@ -26,8 +26,8 @@ export class User {
   @JoinTable({ name: 'user_roles' })
   public roles: Role[];
 
-  @OneToMany(() => Product, (product) => product.merchant)
-  public products: Product;
+  @OneToMany('Product', 'merchant')
+  public products: Product[];
 
   @CreateDateColumn({ type: 'timestamp' })
   public createdAt!: Date;

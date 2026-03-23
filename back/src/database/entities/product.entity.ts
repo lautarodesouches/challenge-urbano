@@ -20,8 +20,8 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Category } from './category.entity';
-import { User } from './user.entity';
+import type { Category } from './category.entity';
+import type { User } from './user.entity';
 
 @Entity()
 export class Product {
@@ -70,11 +70,11 @@ export class Product {
   @IsNumber()
   public merchantId: number;
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ManyToOne('User', 'products')
   @JoinColumn({ name: 'merchantId' })
   public merchant: User;
 
-  @ManyToOne(() => Category, (category) => category.products)
+  @ManyToOne('Category', 'products')
   @JoinColumn({ name: 'categoryId' })
   public category: Category;
 

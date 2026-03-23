@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { configuration } from 'src/config';
-import { Category } from 'src/database/entities/category.entity';
-import { Role } from 'src/database/entities/role.entity';
-import { User } from 'src/database/entities/user.entity';
-import { TypeOrmConfigService } from 'src/database/typeorm/typeorm.service';
+import { Category } from '../entities/category.entity';
+import { Role } from '../entities/role.entity';
+import { User } from '../entities/user.entity';
+import { TypeOrmConfigService } from '../typeorm/typeorm.service';
 import { Color } from '../entities/color.entity';
 import { Country } from '../entities/country.entity';
 import { Currency } from '../entities/currency.entity';
@@ -19,6 +19,11 @@ import { CurrencySeeder } from './seeders/currency.seeder';
 import { RolesSeeder } from './seeders/role.seeder';
 import { SizeSeeder } from './seeders/size.seeder';
 
+import { Inventory } from '../entities/inventory.entity';
+import { Product } from '../entities/product.entity';
+import { ProductVariation } from '../entities/productVariation.entity';
+import { ProductVariationPrice } from '../entities/productVariation_price.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
@@ -30,6 +35,10 @@ import { SizeSeeder } from './seeders/size.seeder';
       Color,
       Country,
       Currency,
+      Inventory,
+      Product,
+      ProductVariation,
+      ProductVariationPrice,
     ]),
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
   ],

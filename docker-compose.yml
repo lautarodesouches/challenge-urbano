@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -45,12 +44,12 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: node:18-alpine
+    image: node:22-alpine
     container_name: challenge_frontend
     working_dir: /app
     volumes:
       - ./front:/app
-    command: pnpm dev
+    command: sh -c "corepack enable pnpm && CI=true pnpm install && pnpm dev"
     ports:
       - "3001:3000"
 

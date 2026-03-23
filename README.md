@@ -20,8 +20,14 @@ Para resolver la orquestación, se creó un robusto archivo `docker-compose.yml`
 
 ---
 
-### Cómo levantar el proyecto localmente
-1. Copiar el entorno: `cp back/src/common/envs/development.env .env` (y asegurarse de configurar las credenciales base).
-2. Orquestar la infraestructura: `docker-compose up -d postgres redis`
-3. Instalar dependencias en front y back a través de `pnpm install` en sus respectivas carpetas.
-4. Levantar la suite completa: `docker-compose up -d` o individualmente en local.
+### Cómo levantar el proyecto localmente (Docker)
+
+Todo el ecosistema (Frontend, Backend, PostgreSQL y Redis) está 100% dockerizado y configurado para levantarse con un solo comando.
+
+1. **(Opcional - Para tu Editor)**: Para que VS Code reconozca las dependencias y tipos correctamente en tu máquina Windows, ejecuta `npm install` dentro de la carpeta `/back` y `pnpm install` dentro de `/front`. (Ambas carpetas ya tienen un estricto `.dockerignore` y `.gitignore` configurados).
+2. **Levantar la suite completa**: Sitúate en la raíz del proyecto y ejecuta:
+   ```bash
+   docker compose up --build
+   ```
+   > **Nota Técnica:** El frontend utilizará internamente `node:22-alpine` para ser compatible con Vite 6+.
+3. **Poblar la automatización (Seeds)**: Dado que el boilerplate original contiene dependencias circulares intratables por NestJS en su CLI independiente, se ha mitigado esto explícitamente y se han habilitado las tablas dinámicas (`synchronize`). Para instalar datos de prueba rápidamente, la mejor práctica en este entorno es incluir sentencias SQL planas en el archivo `back/init.sql`, el cual es consumido automáticamente al crear el contenedor Postgres.
