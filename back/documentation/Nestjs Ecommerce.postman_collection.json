@@ -225,7 +225,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"admin@admin.com\",\n    \"password\": \"12345678\"\n}",
+							"raw": "{\n    \"email\": \"admin@challenge.com\",\n    \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -251,7 +251,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"admin@admin.com\",\n    \"password\": \"12345678\"\n}",
+									"raw": "{\n    \"email\": \"admin@challenge.com\",\n    \"password\": \"password123\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
