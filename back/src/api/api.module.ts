@@ -7,6 +7,7 @@ import { RoleModule } from './role/role.module';
 import { ProductModule } from './product/product.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationModule } from './notification/notification.module';
+import { EventsModule } from './events/events.module';
 import { ErrorsFilter } from 'src/errors/errors.filter';
 
 @Module({
@@ -17,6 +18,7 @@ import { ErrorsFilter } from 'src/errors/errors.filter';
     ProductModule,
     InventoryModule,
     NotificationModule,
+    EventsModule,
   ],
   providers: [
     {
