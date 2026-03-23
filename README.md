@@ -1,33 +1,39 @@
-# E-Commerce Monorepo
+# Challenge E-Commerce Urbano (Event-Driven)
 
-Este repositorio es la resolución del **Challenge Sr Fullstack (Microservicios)**, que toma como punto de partida un monolito básico en NestJS y evoluciona su arquitectura hacia un modelo desacoplado y orientado a eventos (Event-Driven).
+Este repositorio es la resolución del **Challenge Sr Fullstack (Microservicios)**, evolucionando un monolito básico en NestJS hacia una arquitectura desacoplada y orientada a eventos.
 
-## Avance Actual (Fase Inicial & Diagnóstico)
+## 1. Problemas detectados en el diseño original
+* **Dependencias Circulares y Crash del CLI:** El sistema de Seeders estaba fuertemente acoplado al módulo principal de la API mediante inyección de dependencias (`@Injectable`). Esto, sumado al uso de *Globs* expansivos (`**/*.ts`), provocaba que el compilador de TypeORM entrara en un bucle infinito al leer su propio archivo de configuración, resultando en un error `Maximum call stack size exceeded` que impedía correr migraciones.
+* **Falta de Idempotencia y Type-Safety:** La creación de datos "mock" usaba el anti-patrón `any` y no verificaba la existencia previa de la data, lo que generaba violaciones de Restricciones de Clave Foránea y excepciones silenciosas al ejecutarse múltiples veces.
+* **Monolito Procedural Bloqueante:** El Servicio de Productos (`ProductService`) ejecutaba toda la lógica de negocio de manera síncrona pura, imposibilitando la escalabilidad reactiva si se requería notificar a otros sistemas (como Inventario o Correos) tras el alta lógica de un ítem.
 
-En cumplimiento con la primera etapa del desafío (*1. Descargar el repositorio, 2. Diagnóstico inicial*), se han realizado las siguientes reestructuraciones y correcciones fundamentales para tener una base robusta y lista para evolucionar:
+## 2. Decisiones técnicas relevantes
+* **Orquestación en Monorepo Dockerizado:** Se unificó el ecosistema (Frontend React, Backend NestJS, PostgreSQL y Redis) mediante un `docker-compose.yml` central, garantizando reproductibilidad total sin configuraciones locales tediosas y habilitando volúmenes de _Hot Reload_.
+* **Seeders Topológicos Independientes:** Se extirpó toda la inyección de NestJS de la capa de Base de Datos. Los seeders ahora son scripts TypeScript de TypeORM puros (`DataSource`) que respetan la integridad referencial (ej: insertando `Category` antes que `Product`).
+* **Gateway WebSockets Híbrido:** Para conectar el Backend Event-Driven con el Frontend React, se implementó `@nestjs/websockets`. Los eventos asíncronos internos de Node.js rebotan transparentemente hacia el exterior en forma de WebSockets garantizando actualizaciones fluidas en las tablas del dashboard.
 
-### 1. Migración a Monorepo Activo
-* El entorno fue rediseñado de un monolito estándar a un monorepo lógico dividiendo responsabilidades en las carpetas `/back` y `/front`.
-* Se crearon reglas estrictas de `.gitignore` en la raíz para proteger credenciales (`.env`) y volúmenes de datos temporales (Docker).
-* La configuración del linter y prettier ha sido correctamente acotada a cada proyecto para evitar conflictos de estilo entre NestJS y React.
+## 3. Qué eventos se implementaron y por qué
+Para romper el monolito publicamos dos eventos de dominio centrales utilizando la asincronía de `@nestjs/event-emitter`:
 
-### 2. Infraestructura como Código (Docker)
-Para resolver la orquestación, se creó un robusto archivo `docker-compose.yml` en la raíz que unifica todo el ecosistema:
-* **PostgreSQL (15):** Ejecutando los scripts iniciales y mapeado mediante un volumen permanente.
-* **Redis:** Instanciado y listo para actuar como el *Message Broker* central de la nueva arquitectura de eventos.
-* **Backend:** Expuesto y configurado para tomar todas sus credenciales (de BD y Redis) de forma limpia a través de variables de entorno.
-* **Frontend:** Servido a través de un contenedor, con _Hot Reload_ y mapeo de volúmenes funcional.
+1. **`product.created`**:
+   * **Por qué:** Cuando un comerciante registra un *borrador* de producto nuevo, el sistema logístico debe saberlo anticipadamente para reservar el espacio lógico en la bodega de inventarios.
+   * **Consumidor Desacoplado:** `InventoryModule`. Reacciona en el background sin frenar el request HTTP, simulando de forma asíncrona la sincronización del Stock inicial y enviando la confirmación por WebSocket.
+2. **`product.activated`**:
+   * **Por qué:** Cuando el borrador aprueba las validaciones y se publica en el catálogo público, es vital notificar al ecosistema global para accionar las alertas de venta.
+   * **Consumidor Desacoplado:** `NotificationModule`. Atrapa el evento y despacha simulacros de _push notifications_ y _correos_ paralelamente, logrando un tiempo de respuesta de red inmediato asumiendo cargas pesadas.
 
----
+## 4. Cómo levantar el proyecto
+El sistema está 100% dockerizado para un despliegue inmediato.
 
-### Cómo levantar el proyecto localmente (Docker)
-
-Todo el ecosistema (Frontend, Backend, PostgreSQL y Redis) está 100% dockerizado y configurado para levantarse con un solo comando.
-
-1. **(Opcional - Para tu Editor)**: Para que VS Code reconozca las dependencias y tipos correctamente en tu máquina Windows, ejecuta `npm install` dentro de la carpeta `/back` y `pnpm install` dentro de `/front`. (Ambas carpetas ya tienen un estricto `.dockerignore` y `.gitignore` configurados).
-2. **Levantar la suite completa**: Sitúate en la raíz del proyecto y ejecuta:
+1. Sitúate en la raíz del proyecto y arranca todo el clúster en segundo plano:
    ```bash
-   docker compose up --build
+   docker compose up --build -d
    ```
-   > **Nota Técnica:** El frontend utilizará internamente `node:22-alpine` para ser compatible con Vite 6+.
-3. **Poblar la automatización (Seeds)**: Dado que el boilerplate original contiene dependencias circulares intratables por NestJS en su CLI independiente, se ha mitigado esto explícitamente y se han habilitado las tablas dinámicas (`synchronize`). Para instalar datos de prueba rápidamente, la mejor práctica en este entorno es incluir sentencias SQL planas en el archivo `back/init.sql`, el cual es consumido automáticamente al crear el contenedor Postgres.
+2. Aplica las migraciones estructurales de la Base de Datos:
+   ```bash
+   docker compose exec backend npm run migration:run
+   ```
+3. Ejecuta el orquestador independiente para sembrar el catálogo de pruebas:
+   ```bash
+   docker compose exec backend npm run seed:run
+   ```
