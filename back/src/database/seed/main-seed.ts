@@ -21,6 +21,7 @@ import { CurrencySeeder } from './seeders/1-root/currency.seeder';
 import { RoleSeeder } from './seeders/1-root/role.seeder';
 import { SizeSeeder } from './seeders/1-root/size.seeder';
 import { AdminSeeder } from './seeders/2-composite/admin.seeder';
+import { UserSeeder } from './seeders/2-composite/user.seeder';
 import { ProductSeeder } from './seeders/2-composite/product.seeder';
 
 async function bootstrap() {
@@ -80,6 +81,9 @@ async function bootstrap() {
     console.log('--- 🌱 Etapa 2: Dominios Compuestos ---');
     console.log('>> Ejecutando AdminSeeder...');
     await new AdminSeeder().seed(manager);
+
+    console.log('>> Ejecutando UserSeeder...');
+    await new UserSeeder().seed(manager);
 
     console.log('>> Ejecutando ProductSeeder...');
     await new ProductSeeder().seed(manager);

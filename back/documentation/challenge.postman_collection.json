@@ -17,7 +17,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"test1234@test.com\",\n    \"password\": \"12345678\"\n}",
+							"raw": "{\n    \"email\": \"user@challenge.com\",\n    \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -121,7 +121,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"test1234@test.com\",\n    \"password\": \"12345678\"\n}",
+							"raw": "{\n    \"email\": \"user@challenge.com\",\n    \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -147,7 +147,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"test1234@test.com\",\n    \"password\": \"12345678\"\n}",
+									"raw": "{\n    \"email\": \"user@challenge.com\",\n    \"password\": \"password123\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -339,7 +339,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"test2@test.com\",\n    \"password\": \"12345678\"\n}",
+							"raw": "{\n    \"email\": \"user@challenge.com\",\n    \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -372,7 +372,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"email\": \"test2@test.com\",\n    \"password\": \"12345678\"\n}",
+									"raw": "{\n    \"email\": \"user@challenge.com\",\n    \"password\": \"password123\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
