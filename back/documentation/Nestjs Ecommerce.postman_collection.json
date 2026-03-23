@@ -25,7 +25,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/auth/register",
+							"raw": "{{url}}/api/auth/register",
 							"host": [
 								"{{url}}"
 							],
@@ -51,7 +51,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/auth/register",
+									"raw": "{{url}}/api/auth/register",
 									"host": [
 										"{{url}}"
 									],
@@ -129,7 +129,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/auth/login",
+							"raw": "{{url}}/api/auth/login",
 							"host": [
 								"{{url}}"
 							],
@@ -155,7 +155,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/auth/login",
+									"raw": "{{url}}/api/auth/login",
 									"host": [
 										"{{url}}"
 									],
@@ -233,7 +233,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/auth/login",
+							"raw": "{{url}}/api/auth/login",
 							"host": [
 								"{{url}}"
 							],
@@ -259,7 +259,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/auth/login",
+									"raw": "{{url}}/api/auth/login",
 									"host": [
 										"{{url}}"
 									],
@@ -347,7 +347,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/user/profile",
+							"raw": "{{url}}/api/user/profile",
 							"host": [
 								"{{url}}"
 							],
@@ -380,7 +380,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/user/profile",
+									"raw": "{{url}}/api/user/profile",
 									"host": [
 										"{{url}}"
 									],
@@ -465,7 +465,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/role/assign",
+							"raw": "{{url}}/api/role/assign",
 							"host": [
 								"{{url}}"
 							],
@@ -498,7 +498,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/role/assign",
+									"raw": "{{url}}/api/role/assign",
 									"host": [
 										"{{url}}"
 									],
@@ -583,7 +583,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/product/create",
+							"raw": "{{url}}/api/product/create",
 							"host": [
 								"{{url}}"
 							],
@@ -616,7 +616,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/product/create",
+									"raw": "{{url}}/api/product/create",
 									"host": [
 										"{{url}}"
 									],
@@ -699,7 +699,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/product/1",
+							"raw": "{{url}}/api/product/1",
 							"host": [
 								"{{url}}"
 							],
@@ -732,7 +732,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/product/1",
+									"raw": "{{url}}/api/product/1",
 									"host": [
 										"{{url}}"
 									],
@@ -812,7 +812,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/product/3",
+							"raw": "{{url}}/api/product/3",
 							"host": [
 								"{{url}}"
 							],
@@ -845,7 +845,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/product/3",
+									"raw": "{{url}}/api/product/3",
 									"host": [
 										"{{url}}"
 									],
@@ -925,7 +925,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/product/1/details",
+							"raw": "{{url}}/api/product/1/details",
 							"host": [
 								"{{url}}"
 							],
@@ -959,7 +959,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{url}}/product/3/details",
+									"raw": "{{url}}/api/product/3/details",
 									"host": [
 										"{{url}}"
 									],
@@ -1040,7 +1040,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/product/2/activate",
+							"raw": "{{url}}/api/product/2/activate",
 							"host": [
 								"{{url}}"
 							],

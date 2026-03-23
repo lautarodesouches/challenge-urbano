@@ -55,7 +55,7 @@ function App() {
     queryFn: async () => {
       if (!token) return [];
       try {
-        const res = await fetch(`${API_BASE_URL}/product`, {
+        const res = await fetch(`${API_BASE_URL}/api/product`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
