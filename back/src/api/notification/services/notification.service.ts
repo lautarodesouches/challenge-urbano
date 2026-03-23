@@ -48,4 +48,20 @@ export class NotificationService {
       time: payload.timestamp,
     });
   }
+
+  @OnEvent('product.price_changed', { async: true })
+  async handlePriceChanged(payload: { productId: number; productTitle: string; oldPrice: number; newPrice: number; timestamp: Date }) {
+    this.logger.log(
+      `[Notification Consumer] Simulando alerta PUSH a Favoritos: "El artículo ${payload.productTitle} mutó su precio de $${payload.oldPrice} a $${payload.newPrice}"`,
+    );
+
+    this.eventsGateway.broadcast('product:price_changed', {
+      type: 'price_update_alert',
+      productId: payload.productId,
+      productTitle: payload.productTitle,
+      oldPrice: payload.oldPrice,
+      newPrice: payload.newPrice,
+      time: payload.timestamp,
+    });
+  }
 }

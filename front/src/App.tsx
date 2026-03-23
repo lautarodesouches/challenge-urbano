@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './components/ui/table';
 import { Badge } from './components/ui/badge';
 import { ScrollArea } from './components/ui/scroll-area';
-import { Activity, Database, Loader2, Package, Radio, Zap, LogOut, AlertTriangle } from 'lucide-react';
+import { Activity, Database, Loader2, Package, Radio, Zap, LogOut, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { LoginForm } from './components/LoginForm';
 import { API_BASE_URL } from './config/constants';
 
@@ -52,12 +52,24 @@ function App() {
       addLog(logEntry);
     });
 
+    socket.on('product:price_changed', (data: any) => {
+      const isPriceUp = data.newPrice > data.oldPrice;
+      const logEntry = {
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(data.time).toLocaleTimeString(),
+        message: `Actualización de Precio en ${data.productTitle}: de $${data.oldPrice} a $${data.newPrice}`,
+        type: isPriceUp ? 'price_up' : 'price_down'
+      };
+      addLog(logEntry as any);
+    });
+
     return () => {
       socket.off('connect');
       socket.off('disconnect');
       socket.off('inventory:synced');
       socket.off('notification:push_sent');
       socket.off('inventory:low_stock');
+      socket.off('product:price_changed');
     };
   }, [addLog]);
 
@@ -196,15 +208,18 @@ function App() {
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {logs.map((log) => (
+                    {logs.map((log: any) => (
                       <div key={log.id} className={`flex items-start rounded-lg p-3 text-sm transition-all animate-in slide-in-from-left-2 ${
                         log.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-200' :
                         log.type === 'success' ? 'bg-emerald-500/5 text-zinc-300 border border-emerald-500/10' :
+                        log.type === 'price_up' || log.type === 'price_down' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-200' :
                         'bg-zinc-800/50 text-zinc-400'
                       }`}>
                         <div className="flex-shrink-0 mt-0.5 w-6">
                           {log.type === 'error' ? <AlertTriangle className="h-4 w-4 text-red-400" /> :
                            log.type === 'success' ? <Zap className="h-4 w-4 text-emerald-400" /> :
+                           log.type === 'price_up' ? <TrendingUp className="h-4 w-4 text-blue-400" /> :
+                           log.type === 'price_down' ? <TrendingDown className="h-4 w-4 text-blue-400" /> :
                            <Activity className="h-4 w-4 text-zinc-500" />}
                         </div>
                         <div className="flex-1 ml-2 space-y-1">
@@ -214,6 +229,11 @@ function App() {
                             </span>
                             {log.type === 'error' && (
                               <Badge variant="destructive" className="h-5 text-[10px] px-1.5 bg-red-500 hover:bg-red-600">CRITICAL</Badge>
+                            )}
+                            {(log.type === 'price_up' || log.type === 'price_down') && (
+                              <Badge variant="outline" className="h-5 text-[10px] px-1.5 bg-blue-950 border-blue-800 text-blue-300">
+                                PRICING
+                              </Badge>
                             )}
                           </div>
                           <p className="leading-snug">

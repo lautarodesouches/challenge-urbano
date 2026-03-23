@@ -12,6 +12,7 @@ import { errorMessages } from 'src/errors/custom';
 import { validate } from 'class-validator';
 import { successObject } from 'src/common/helper/sucess-response.interceptor';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ProductVariationPrice } from '../../../database/entities/productVariation_price.entity';
 
 @Injectable()
 export class ProductService {
@@ -138,4 +139,41 @@ export class ProductService {
 
     return successObject;
   }
+
+  async updatePrice(productId: number, basePrice: number, merchantId: number) {
+    const product = await this.entityManager.findOne(Product, {
+      where: { id: productId, merchantId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('Producto no encontrado o no autorizado');
+    }
+
+    // Buscamos directamente el primer precio activo del producto en Postgres 
+    // sin basarnos en la variable relacional 'variations' que falta en el entity nativo.
+    const priceEntity = await this.entityManager
+      .createQueryBuilder(ProductVariationPrice, 'price')
+      .innerJoin('price.productVariation', 'variation')
+      .where('variation.productId = :productId', { productId })
+      .getOne();
+
+    if (!priceEntity) {
+        throw new NotFoundException('No existe configuración de precios para este artículo');
+    }
+
+    const previousPrice = priceEntity.price;
+    priceEntity.price = basePrice;
+    await this.entityManager.save(ProductVariationPrice, priceEntity);
+
+    this.eventEmitter.emit('product.price_changed', {
+      productId: product.id,
+      productTitle: product.title,
+      oldPrice: previousPrice,
+      newPrice: basePrice,
+      timestamp: new Date(),
+    });
+
+    return { success: true, newPrice: basePrice };
+  }
 }
+
