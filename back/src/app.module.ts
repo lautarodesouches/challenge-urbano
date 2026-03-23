@@ -7,10 +7,13 @@ import { TypeOrmConfigService } from './database/typeorm/typeorm.service';
 import { ApiModule } from './api/api.module';
 import { configuration } from './config';
 
+import { EventEmitterModule } from '@nestjs/event-emitter';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ load: [configuration], isGlobal: true }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
+    EventEmitterModule.forRoot(),
     ApiModule,
   ],
   controllers: [AppController],
