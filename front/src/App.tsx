@@ -8,9 +8,10 @@ import { Badge } from './components/ui/badge';
 import { ScrollArea } from './components/ui/scroll-area';
 import { Activity, Database, Loader2, Package, Radio, Zap, LogOut } from 'lucide-react';
 import { LoginForm } from './components/LoginForm';
+import { API_BASE_URL } from './config/constants';
 
 // Conexión WebSockets al Gateway de NestJS (Expuesto en root por Docker)
-const socket = io('http://localhost:3000');
+const socket = io(API_BASE_URL);
 
 function App() {
   const { logs, addLog, token, logout } = useAppStore();
@@ -54,7 +55,7 @@ function App() {
     queryFn: async () => {
       if (!token) return [];
       try {
-        const res = await fetch('http://localhost:3000/product', {
+        const res = await fetch(`${API_BASE_URL}/product`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

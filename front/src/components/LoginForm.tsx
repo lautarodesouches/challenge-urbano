@@ -3,6 +3,7 @@ import { useAppStore } from '../store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { Loader2, Lock } from 'lucide-react';
+import { API_BASE_URL } from '../config/constants';
 
 export function LoginForm() {
   const [email, setEmail] = useState('admin@challenge.com');
@@ -17,7 +18,7 @@ export function LoginForm() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
