@@ -150,7 +150,7 @@ function App() {
                       products?.map((p: any) => (
                         <TableRow key={p.id} className="border-neutral-800 hover:bg-neutral-800/50 transition-colors">
                           <TableCell className="font-mono text-neutral-400">#{p.id}</TableCell>
-                          <TableCell className="font-medium">{p.name || 'N/A'}</TableCell>
+                          <TableCell className="font-medium">{p.title || 'N/A'}</TableCell>
                           <TableCell className="text-neutral-500">{p.description?.substring(0,30) || '...'}</TableCell>
                           <TableCell className="text-right">
                             <Badge variant={p.isActive ? "default" : "secondary"} className={p.isActive ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-neutral-800 text-neutral-400 border-neutral-700"}>
