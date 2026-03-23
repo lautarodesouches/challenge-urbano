@@ -6,13 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './components/ui/table';
 import { Badge } from './components/ui/badge';
 import { ScrollArea } from './components/ui/scroll-area';
-import { Activity, Database, Loader2, Package, Radio, Zap } from 'lucide-react';
+import { Activity, Database, Loader2, Package, Radio, Zap, LogOut } from 'lucide-react';
+import { LoginForm } from './components/LoginForm';
 
 // Conexión WebSockets al Gateway de NestJS (Expuesto en root por Docker)
 const socket = io('http://localhost:3000');
 
 function App() {
-  const { logs, addLog } = useAppStore();
+  const { logs, addLog, token, logout } = useAppStore();
   const [isConnected, setIsConnected] = useState(socket.connected);
 
   useEffect(() => {
@@ -47,12 +48,21 @@ function App() {
     };
   }, [addLog]);
 
-  // React Query: Consumo robusto y cacheado de la API NestJS
+  // React Query: Consumo robusto y cacheado de la API NestJS protejido con JWT
   const { data: products, isLoading } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', token],
     queryFn: async () => {
+      if (!token) return [];
       try {
-        const res = await fetch('http://localhost:3000/api/product');
+        const res = await fetch('http://localhost:3000/product', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.status === 401) {
+          logout(); // El token expiró o es inválido, cerramos sesión local
+          throw new Error('Unauthorized');
+        }
         if (!res.ok) throw new Error('API Error');
         const json = await res.json();
         return Array.isArray(json) ? json : (json.data || []);
@@ -60,7 +70,13 @@ function App() {
         return [];
       }
     },
+    enabled: !!token, // Solo se ejecuta la query si existe un JWT
   });
+
+  // Guard de autenticación frontal
+  if (!token) {
+    return <LoginForm />;
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-50 p-6 selection:bg-indigo-500/30 font-sans">
@@ -82,6 +98,9 @@ function App() {
             <Badge variant={isConnected ? 'default' : 'destructive'} className={isConnected ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : ""}>
               {isConnected ? <><Radio className="w-3 h-3 mr-1 animate-pulse inline" /> WebSocket Live</> : <><Loader2 className="w-3 h-3 mr-1 animate-spin inline" /> Disconnected</>}
             </Badge>
+            <button onClick={() => logout()} className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-colors" title="Cerrar sesión">
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </header>
 
