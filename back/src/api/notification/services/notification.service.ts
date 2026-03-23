@@ -33,4 +33,19 @@ export class NotificationService {
       time: payload.timestamp,
     });
   }
+
+  @OnEvent('inventory.low_stock', { async: true })
+  async handleLowStock(payload: { productId: number; productTitle: string; remainingQuantity: number; timestamp: Date }) {
+    this.logger.warn(
+      `[Notification Consumer] Simulando alerta PUSH a Gerencia: "Stock Crítico (${payload.remainingQuantity} uds) para el producto ${payload.productTitle}"`,
+    );
+
+    this.eventsGateway.broadcast('inventory:low_stock', {
+      type: 'critical_stock_alert',
+      productId: payload.productId,
+      productTitle: payload.productTitle,
+      remainingQuantity: payload.remainingQuantity,
+      time: payload.timestamp,
+    });
+  }
 }

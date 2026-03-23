@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './components/ui/table';
 import { Badge } from './components/ui/badge';
 import { ScrollArea } from './components/ui/scroll-area';
-import { Activity, Database, Loader2, Package, Radio, Zap, LogOut } from 'lucide-react';
+import { Activity, Database, Loader2, Package, Radio, Zap, LogOut, AlertTriangle } from 'lucide-react';
 import { LoginForm } from './components/LoginForm';
 import { API_BASE_URL } from './config/constants';
 
@@ -33,12 +33,23 @@ function App() {
 
     // Escuchar Notificaciones PUSH Globales
     socket.on('notification:push_sent', (data) => {
-      addLog({
-        type: 'GLOBAL_ALERT',
-        message: `Producto ${data.productId} ha sido ACTIVADO para comercialización en vivo.`,
-        payload: data,
-        timestamp: data.time || new Date().toISOString(),
-      });
+      const logEntry = {
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date().toLocaleTimeString(),
+        message: data.message,
+        type: data.action === 'SYNC_COMPLETE' ? 'success' : 'info' as const
+      };
+      addLog(logEntry);
+    });
+
+    socket.on('inventory:low_stock', (data: any) => {
+      const logEntry = {
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(data.time).toLocaleTimeString(),
+        message: `¡STOCK CRÍTICO! ${data.productTitle} ha caído a ${data.remainingQuantity} unidades.`,
+        type: 'error' as const
+      };
+      addLog(logEntry);
     });
 
     return () => {
@@ -46,6 +57,7 @@ function App() {
       socket.off('disconnect');
       socket.off('inventory:synced');
       socket.off('notification:push_sent');
+      socket.off('inventory:low_stock');
     };
   }, [addLog]);
 
@@ -178,30 +190,40 @@ function App() {
             </CardHeader>
             <CardContent className="flex-1 p-0">
               <ScrollArea className="h-[500px] p-4">
-                <div className="space-y-4">
-                  {logs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-48 text-neutral-500 space-y-3">
-                      <Database className="w-8 h-8 opacity-20" />
-                      <p className="text-sm text-center">Esperando transmisiones <br/>del EventGateway...</p>
-                    </div>
-                  ) : (
-                     logs.map((log) => (
-                      <div key={log.id} className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-indigo-500/30 shadow-lg animate-in slide-in-from-right-4 fade-in duration-300 transition-all group">
-                        <div className="flex justify-between items-start mb-2">
-                          <Badge variant="outline" className="text-[10px] font-mono bg-neutral-950 border-neutral-700 text-indigo-300">
-                            {log.type}
-                          </Badge>
-                          <span className="text-[10px] text-neutral-500 font-mono">
-                            {new Date(log.timestamp).toLocaleTimeString()}
-                          </span>
+                {logs.length === 0 ? (
+                  <p className="text-zinc-500 italic text-sm text-center py-4">
+                    Comienza a operar la DB para escuchar el pulso de los eventos...
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {logs.map((log) => (
+                      <div key={log.id} className={`flex items-start rounded-lg p-3 text-sm transition-all animate-in slide-in-from-left-2 ${
+                        log.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-200' :
+                        log.type === 'success' ? 'bg-emerald-500/5 text-zinc-300 border border-emerald-500/10' :
+                        'bg-zinc-800/50 text-zinc-400'
+                      }`}>
+                        <div className="flex-shrink-0 mt-0.5 w-6">
+                          {log.type === 'error' ? <AlertTriangle className="h-4 w-4 text-red-400" /> :
+                           log.type === 'success' ? <Zap className="h-4 w-4 text-emerald-400" /> :
+                           <Activity className="h-4 w-4 text-zinc-500" />}
                         </div>
-                        <p className="text-sm text-neutral-300 leading-relaxed font-mono">
-                          {log.message}
-                        </p>
+                        <div className="flex-1 ml-2 space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="font-mono text-xs opacity-70">
+                              [{log.timestamp}]
+                            </span>
+                            {log.type === 'error' && (
+                              <Badge variant="destructive" className="h-5 text-[10px] px-1.5 bg-red-500 hover:bg-red-600">CRITICAL</Badge>
+                            )}
+                          </div>
+                          <p className="leading-snug">
+                            {log.message}
+                          </p>
+                        </div>
                       </div>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
               </ScrollArea>
             </CardContent>
           </Card>
