@@ -2,10 +2,10 @@ FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN npm ci || npm install
+COPY package.json pnpm-lock.yaml* ./
+RUN corepack enable pnpm && pnpm i
 
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
-CMD ["npm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:dev"]
