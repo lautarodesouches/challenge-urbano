@@ -38,6 +38,9 @@ services:
       - REDIS_PORT=6379
     ports:
       - "3000:3000"
+    volumes:
+      - ./back:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       - postgres
       - redis

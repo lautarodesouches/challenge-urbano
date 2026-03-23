@@ -1,3 +1,5 @@
+import { EntityManager } from 'typeorm';
+
 export interface SeederInterface {
-  seed(): Promise<void>;
+  seed(manager: EntityManager): Promise<void>;
 }
