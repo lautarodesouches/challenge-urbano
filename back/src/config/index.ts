@@ -22,7 +22,7 @@ export const configuration = () => ({
     secret: process.env.JWT_SECRET || 'secret',
   },
   adminUser: {
-    email: process.env.ADMIN_EMAIL || 'admin@admin.com',
+    email: process.env.ADMIN_EMAIL || 'admin@challenge.com',
     password: process.env.ADMIN_PASSWORD || '12345678',
   },
 });

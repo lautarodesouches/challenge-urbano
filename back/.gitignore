@@ -36,3 +36,6 @@ lerna-debug.log*
 
 #database data
 database-data
+.pnpm-store
+.pnpm-store/
+node_modules/.pnpm

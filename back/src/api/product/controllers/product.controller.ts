@@ -3,10 +3,10 @@ import { RoleIds } from '../../role/enum/role.enum';
 import { CreateProductDto, ProductDetailsDto } from '../dto/product.dto';
 import { UpdatePriceDto } from '../dto/price.dto';
 import { ProductService } from '../services/product.service';
-import { Auth } from 'src/api/auth/guards/auth.decorator';
-import { FindOneParams } from 'src/common/helper/findOneParams.dto';
-import { CurrentUser } from 'src/api/auth/guards/user.decorator';
-import { User } from 'src/database/entities/user.entity';
+import { Auth } from '../../auth/guards/auth.decorator';
+import { FindOneParams } from '../../../common/helper/findOneParams.dto';
+import { CurrentUser } from '../../auth/guards/user.decorator';
+import { User } from '../../../database/entities/user.entity';
 
 @Controller('product')
 export class ProductController {

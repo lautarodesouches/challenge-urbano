@@ -1,10 +1,10 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
 import { InventoryService } from '../services/inventory.service';
 import { UpdateStockDto } from '../dto/inventory.dto';
-import { Auth } from 'src/api/auth/guards/auth.decorator';
-import { RoleIds } from 'src/api/role/enum/role.enum';
-import { CurrentUser } from 'src/api/auth/guards/user.decorator';
-import { User } from 'src/database/entities/user.entity';
+import { Auth } from '../../auth/guards/auth.decorator';
+import { RoleIds } from '../../role/enum/role.enum';
+import { CurrentUser } from '../../auth/guards/user.decorator';
+import { User } from '../../../database/entities/user.entity';
 
 @Controller('inventory')
 export class InventoryController {

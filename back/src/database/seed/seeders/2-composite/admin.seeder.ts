@@ -4,7 +4,7 @@ import { Role } from '../../../entities/role.entity';
 import { RoleIds } from '../../../../api/role/enum/role.enum';
 import { SeederInterface } from '../../seeder.interface';
 import { createValidatedInstance } from '../../helpers/create-instance';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 
 export class AdminSeeder implements SeederInterface {
   async seed(manager: EntityManager): Promise<void> {

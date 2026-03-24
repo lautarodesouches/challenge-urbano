@@ -15,3 +15,6 @@ redisdata/
 # OS
 .DS_Store
 Thumbs.db
+
+# PNPM Local Cache
+**/.pnpm-store
