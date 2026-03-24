@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useAppStore } from '../store';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
-import { Button } from './ui/button';
-import { Loader2, Lock } from 'lucide-react';
-import { API_BASE_URL } from '../config/constants';
+import { useAppStore } from '../../../store';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../../../components/ui/card';
+import { Button } from '../../../components/ui/button';
+import { Loader2, Zap } from 'lucide-react';
+import { API_BASE_URL } from '../../../config/constants';
 
 export function LoginForm() {
   const [email, setEmail] = useState('admin@challenge.com');

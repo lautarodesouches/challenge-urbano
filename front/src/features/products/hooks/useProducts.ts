@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../lib/axios';
-import type { Product } from '../types';
+import { apiClient } from '../../../lib/axios';
+import type { Product } from '../../../types';
 import { toast } from 'sonner';
 
 export const useProducts = () => {
