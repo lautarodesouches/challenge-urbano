@@ -12,7 +12,7 @@ Este repositorio es la resolución del **Challenge Sr Fullstack (Microservicios)
 * **Deconstrucción de Dominio:** Se separó lógicamente el Catálogo (Productos) de la Bodega (Inventario). Las operaciones de lectura masiva atacan el Catálogo, mientras la Bodega se maneja transaccionalmente de forma aislada.
 * **Patrón de Colas Persistentes (BullMQ + Redis):** La comunicación asíncrona fluye a través de **BullMQ**, garantizando persistencia contra caídas, y capacidades de escalado horizontal (Microservicios).
 * **Idempotencia en Consumidores (Workers):** Los decoradores `@Processor` validan estados previos en PostgreSQL antes de mutar información desde Redis, previniendo inconsistencias si un mensaje se envía duplicado por problemas de red.
-* **Gateway WebSockets Activo e Invalidation Híbrida:** Conexión en tiempo real estructurada. El frontend (Vite + React + React Query) no recarga la UI adivinando tiempos; escucha los WebSockets (`inventory:synced`) del servidor de colas para invalidar inteligentemente su caché cuando los Workers terminan tareas pesadas.
+* **Gateway WebSockets Activo e Invalidation Híbrida:** Conexión en tiempo real estructurada. El frontend (Vite + React + React Query) no recarga la UI adivinando tiempos; escucha los WebSockets (`inventory:synced`) del servidor de colas para invalidar inteligentemente su caché cuando los Workers terminan tareas pesadas. **Esta arquitectura permite que el usuario vea el cambio de stock en vivo sin necesidad de refrescar la página (F5), cumpliendo así rigurosamente el requisito de "validar el sistema de punta a punta".**
 
 ## 3. Topología de Eventos (Fanout Queueing)
 El ecosistema empuja 4 eventos de dominio medulares:
