@@ -1,5 +1,9 @@
 import { EntityManager } from 'typeorm';
-import { Category, CategoryIds, Categories } from '../../../entities/category.entity';
+import {
+  Category,
+  CategoryIds,
+  Categories,
+} from '../../../entities/category.entity';
 import { SeederInterface } from '../../seeder.interface';
 
 export class CategorySeeder implements SeederInterface {

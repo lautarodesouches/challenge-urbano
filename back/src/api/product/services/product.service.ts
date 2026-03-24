@@ -15,7 +15,11 @@ import { ProductVariationPrice } from '../../../database/entities/productVariati
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PRODUCT_QUEUE, NOTIFICATION_QUEUE } from '../../queue/queue.constants';
-import { ProductCreatedPayload, ProductActivatedPayload, PriceChangedPayload } from '../../queue/queue.dto';
+import {
+  ProductCreatedPayload,
+  ProductActivatedPayload,
+  PriceChangedPayload,
+} from '../../queue/queue.dto';
 
 @Injectable()
 export class ProductService {
@@ -24,12 +28,29 @@ export class ProductService {
     private readonly entityManager: EntityManager,
     @InjectQueue(PRODUCT_QUEUE) private readonly productQueue: Queue,
     @InjectQueue(NOTIFICATION_QUEUE) private readonly notificationQueue: Queue,
-  ) { }
+  ) {}
 
   async getProducts() {
-    return this.entityManager.find(Product, {
+    const products = await this.entityManager.find(Product, {
       order: { id: 'DESC' },
     });
+
+    const productsWithPrices = await Promise.all(
+      products.map(async (product) => {
+        const priceEntity = await this.entityManager
+          .createQueryBuilder(ProductVariationPrice, 'price')
+          .innerJoin('price.productVariation', 'variation')
+          .where('variation.productId = :productId', { productId: product.id })
+          .getOne();
+
+        return {
+          ...product,
+          price: priceEntity ? priceEntity.price : null,
+        };
+      }),
+    );
+
+    return productsWithPrices;
   }
 
   async getProduct(productId: number) {
@@ -68,10 +89,12 @@ export class ProductService {
     } as ProductCreatedPayload;
 
     await this.productQueue.add('product.created', createdPayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
     await this.notificationQueue.add('product.created', createdPayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
 
     return savedProduct;
@@ -121,13 +144,51 @@ export class ProductService {
     } as ProductActivatedPayload;
 
     await this.productQueue.add('product.activated', activatedPayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
     await this.notificationQueue.add('product.activated', activatedPayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
 
     return activatedProduct;
+  }
+
+  async deactivateProduct(productId: number, merchantId: number) {
+    const result = await this.entityManager
+      .createQueryBuilder()
+      .update<Product>(Product)
+      .set({ isActive: false })
+      .where('id = :id', { id: productId })
+      .andWhere('merchantId = :merchantId', { merchantId })
+      .returning(['id', 'isActive'])
+      .execute();
+
+    if (result.affected < 1) {
+      throw new NotFoundException(errorMessages.product.notFound);
+    }
+
+    const deactivatedProduct = result.raw[0];
+
+    // Emitimos el evento 'product.deactivated' a las colas
+    const deactivatedPayload = {
+      productId: deactivatedProduct.id,
+      isActive: false,
+      timestamp: new Date(),
+    } as ProductActivatedPayload;
+
+    await this.productQueue.add('product.deactivated', deactivatedPayload, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
+    });
+    
+    await this.notificationQueue.add('product.deactivated', deactivatedPayload, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
+    });
+
+    return deactivatedProduct;
   }
 
   async validate(productId: number) {
@@ -137,9 +198,20 @@ export class ProductService {
       },
     });
     if (!product) throw new NotFoundException(errorMessages.product.notFound);
-    const errors = await validate(product);
 
-    if (errors.length > 0) return false;
+    // Convert the plain DB result into a fully instantiated class,
+    // which transforms the nested 'details' jsonb into ComputerDetails or TestDetails
+    const { plainToInstance } = await import('class-transformer');
+    const productInstance = plainToInstance(Product, product);
+
+    const errors = await validate(productInstance);
+
+    if (errors.length > 0) {
+      throw new ConflictException(
+        'Validation failed: ' +
+          JSON.stringify(errors.map((e) => e.constraints)),
+      );
+    }
 
     return true;
   }
@@ -168,21 +240,60 @@ export class ProductService {
       throw new NotFoundException('Producto no encontrado o no autorizado');
     }
 
-    // Buscamos directamente el primer precio activo del producto en Postgres 
+    // Buscamos directamente el primer precio activo del producto en Postgres
     // sin basarnos en la variable relacional 'variations' que falta en el entity nativo.
-    const priceEntity = await this.entityManager
+    let priceEntity = await this.entityManager
       .createQueryBuilder(ProductVariationPrice, 'price')
       .innerJoin('price.productVariation', 'variation')
       .where('variation.productId = :productId', { productId })
       .getOne();
 
-    if (!priceEntity) {
-        throw new NotFoundException('No existe configuración de precios para este artículo');
-    }
+    let previousPrice = 0;
 
-    const previousPrice = priceEntity.price;
-    priceEntity.price = basePrice;
-    await this.entityManager.save(ProductVariationPrice, priceEntity);
+    if (!priceEntity) {
+      // Create variation and price entity for new products
+      const { ProductVariation } = await import(
+        '../../../database/entities/productVariation.entity'
+      );
+      let variation = await this.entityManager.findOneBy(ProductVariation, {
+        productId,
+      });
+
+      if (!variation) {
+        variation = this.entityManager.create(ProductVariation, {
+          product,
+          productId,
+          sizeCode: 'NA',
+          colorName: 'NA',
+          imageUrls: [],
+        });
+        await this.entityManager.save(ProductVariation, variation);
+      }
+
+      priceEntity = this.entityManager.create(ProductVariationPrice, {
+        productVariation: variation,
+        productVariationId: variation.id,
+        countryCode: 'US',
+        currencyCode: 'USD',
+        price: basePrice,
+      });
+      await this.entityManager.save(ProductVariationPrice, priceEntity);
+
+      const { Inventory } = await import(
+        '../../../database/entities/inventory.entity'
+      );
+      const inventoryEntity = this.entityManager.create(Inventory, {
+        productVariation: variation,
+        productVariationId: variation.id,
+        countryCode: 'US',
+        quantity: 10,
+      });
+      await this.entityManager.save(Inventory, inventoryEntity);
+    } else {
+      previousPrice = priceEntity.price;
+      priceEntity.price = basePrice;
+      await this.entityManager.save(ProductVariationPrice, priceEntity);
+    }
 
     const pricePayload = {
       productId: product.id,
@@ -193,13 +304,14 @@ export class ProductService {
     } as PriceChangedPayload;
 
     await this.productQueue.add('product.price_changed', pricePayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
     await this.notificationQueue.add('product.price_changed', pricePayload, {
-      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 1000 },
     });
 
     return { success: true, newPrice: basePrice };
   }
 }
-

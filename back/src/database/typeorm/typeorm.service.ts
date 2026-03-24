@@ -17,7 +17,8 @@ import { User } from '../entities/user.entity';
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   public createTypeOrmOptions(): TypeOrmModuleOptions {
-    const { entities, migrations, subscribers, ...options } = dataSourceOptions as any;
+    const { entities, migrations, subscribers, ...options } =
+      dataSourceOptions as any;
     return {
       ...options,
       entities: [

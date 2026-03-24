@@ -25,9 +25,12 @@ import { UserSeeder } from './seeders/2-composite/user.seeder';
 import { ProductSeeder } from './seeders/2-composite/product.seeder';
 
 async function bootstrap() {
-  console.log('🔄 Inicializando DataSource de TypeORM para Seeding (Standalone)...');
-  
-  const { migrations, entities, subscribers, ...baseOptions } = dataSourceOptions as any;
+  console.log(
+    '🔄 Inicializando DataSource de TypeORM para Seeding (Standalone)...',
+  );
+
+  const { migrations, entities, subscribers, ...baseOptions } =
+    dataSourceOptions as any;
 
   const seedDataSourceOptions = {
     ...baseOptions,
@@ -62,7 +65,7 @@ async function bootstrap() {
     console.log('--- 🌱 Etapa 1: Dominios Root ---');
     console.log('>> Ejecutando CategorySeeder...');
     await new CategorySeeder().seed(manager);
-    
+
     console.log('>> Ejecutando ColorSeeder...');
     await new ColorSeeder().seed(manager);
 

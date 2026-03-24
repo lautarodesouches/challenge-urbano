@@ -23,8 +23,10 @@ export class Country {
 
 export enum CountryCodes {
   Egypt = 'EG',
+  UnitedStates = 'US',
 }
 
 export enum Countries {
   Egypt = 'Egypt',
+  UnitedStates = 'United States',
 }

@@ -1,5 +1,9 @@
 import { EntityManager } from 'typeorm';
-import { Currency, CurrencyCodes, CurrencyNames } from '../../../entities/currency.entity';
+import {
+  Currency,
+  CurrencyCodes,
+  CurrencyNames,
+} from '../../../entities/currency.entity';
 import { SeederInterface } from '../../seeder.interface';
 
 export class CurrencySeeder implements SeederInterface {

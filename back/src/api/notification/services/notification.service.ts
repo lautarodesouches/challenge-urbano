@@ -5,5 +5,5 @@ import { EventsGateway } from '../../events/events.gateway';
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
-  constructor(private readonly eventsGateway: EventsGateway) { }
+  constructor(private readonly eventsGateway: EventsGateway) {}
 }

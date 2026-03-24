@@ -1,7 +1,11 @@
 import { Global, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { INVENTORY_QUEUE, PRODUCT_QUEUE, NOTIFICATION_QUEUE } from './queue.constants';
+import {
+  INVENTORY_QUEUE,
+  PRODUCT_QUEUE,
+  NOTIFICATION_QUEUE,
+} from './queue.constants';
 
 @Global()
 @Module({

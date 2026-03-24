@@ -51,6 +51,15 @@ export class ProductController {
   }
 
   @Auth(RoleIds.Admin, RoleIds.Merchant)
+  @Post(':id/deactivate')
+  async deactivateProduct(
+    @Param() product: FindOneParams,
+    @CurrentUser() user: User,
+  ) {
+    return this.productService.deactivateProduct(product.id, user.id);
+  }
+
+  @Auth(RoleIds.Admin, RoleIds.Merchant)
   @Delete(':id')
   async deleteProduct(
     @Param() product: FindOneParams,

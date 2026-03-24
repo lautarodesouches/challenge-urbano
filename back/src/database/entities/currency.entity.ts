@@ -23,8 +23,10 @@ export class Currency {
 
 export enum CurrencyCodes {
   EGP = 'EGP',
+  USD = 'USD',
 }
 
 export enum CurrencyNames {
   EGP = 'Egyptian Pound',
+  USD = 'US Dollar',
 }

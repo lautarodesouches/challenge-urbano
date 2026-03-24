@@ -6,6 +6,9 @@ export async function createValidatedInstance<T extends object>(
   plainData: Partial<T>,
 ): Promise<T> {
   const instance = plainToInstance(entityClass, plainData);
-  await validateOrReject(instance, { skipMissingProperties: true, forbidUnknownValues: false });
+  await validateOrReject(instance, {
+    skipMissingProperties: true,
+    forbidUnknownValues: false,
+  });
   return instance;
 }

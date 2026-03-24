@@ -1,5 +1,9 @@
 import { EntityManager } from 'typeorm';
-import { Country, Countries, CountryCodes } from '../../../entities/country.entity';
+import {
+  Country,
+  Countries,
+  CountryCodes,
+} from '../../../entities/country.entity';
 import { SeederInterface } from '../../seeder.interface';
 
 export class CountrySeeder implements SeederInterface {

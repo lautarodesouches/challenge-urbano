@@ -14,7 +14,11 @@ export class ErrorsFilter implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: Error, host: ArgumentsHost): void {
-    Logger.error(exception.message);
+    if (exception instanceof HttpException) {
+      Logger.error(`HttpException: ${JSON.stringify(exception.getResponse())}`);
+    } else {
+      Logger.error(exception.message);
+    }
     const { httpAdapter } = this.httpAdapterHost;
 
     const ctx = host.switchToHttp();

@@ -8,10 +8,14 @@ import { hash } from 'bcryptjs';
 
 export class UserSeeder implements SeederInterface {
   async seed(manager: EntityManager): Promise<void> {
-    const customerRole = await manager.findOneBy(Role, { id: RoleIds.Customer });
+    const customerRole = await manager.findOneBy(Role, {
+      id: RoleIds.Customer,
+    });
 
     if (!customerRole) {
-      console.warn('⚠️ Se omite UserSeeder: Faltan dependencias (Role CUSTOMER)');
+      console.warn(
+        '⚠️ Se omite UserSeeder: Faltan dependencias (Role CUSTOMER)',
+      );
       return;
     }
 

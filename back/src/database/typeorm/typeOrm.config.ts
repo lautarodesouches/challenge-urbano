@@ -19,7 +19,9 @@ export const dataSourceOptions: DataSourceOptions = {
   username: configOptions.database.user,
   password: configOptions.database.password,
   entities: [resolve(__dirname, '../..', '**', '*.entity.{ts,js}')],
-  migrations: [resolve(__dirname, '..', 'migration', 'history', '**', '*.{ts,js}')],
+  migrations: [
+    resolve(__dirname, '..', 'migration', 'history', '**', '*.{ts,js}'),
+  ],
   logger: 'simple-console',
   synchronize: false, // never use TRUE in production!
   logging: process.env.NODE_ENV !== 'production', // for debugging in dev Area only
