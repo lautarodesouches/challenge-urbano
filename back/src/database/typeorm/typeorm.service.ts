@@ -34,7 +34,8 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         Size,
         User,
       ],
-      synchronize: true,
+      synchronize: false,
+      migrationsRun: true,
     };
   }
 }
