@@ -1,5 +1,5 @@
 import { LogOut, Radio, Zap, Loader2 } from 'lucide-react';
-import { Badge } from '../../ui/badge';
+import { Badge } from '../ui/badge';
 
 interface HeaderProps {
   isConnected: boolean;

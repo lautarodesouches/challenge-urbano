@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '../../../store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '../../../components/ui/card';
 import { Button } from '../../../components/ui/button';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2, Lock as LockIcon } from 'lucide-react';
 import { API_BASE_URL } from '../../../config/constants';
 
 export function LoginForm() {
@@ -44,7 +44,7 @@ export function LoginForm() {
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
         <CardHeader className="space-y-2 text-center pb-6">
           <div className="mx-auto w-12 h-12 bg-indigo-500/10 rounded-full flex items-center justify-center border border-indigo-500/20 mb-2">
-            <Lock className="w-6 h-6 text-indigo-400" />
+            <LockIcon className="w-6 h-6 text-indigo-400" />
           </div>
           <CardTitle className="text-2xl font-semibold text-neutral-50 tracking-tight">Acceso Privado</CardTitle>
           <CardDescription className="text-neutral-400">Ingresa tus credenciales para administrar el backend</CardDescription>
