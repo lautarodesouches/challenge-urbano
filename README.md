@@ -40,4 +40,5 @@ El sistema está 100% dockerizado. Todos los servicios (Postgres, Redis, React, 
    ```
 3. Accede al sistema:
    * **Dashboard Analítico Reactivo:** `http://localhost:3001` (Credencial Admin: `admin@challenge.com` / `password123`)
+     > **Nota:** Las credenciales de administrador se pre-cargan mediante un Seeder **solo para fines de evaluación del challenge** en el entorno local/staging.
    * **Core API Endpoint:** `http://localhost:3000`
