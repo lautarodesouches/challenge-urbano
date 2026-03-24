@@ -1,10 +1,14 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import { Inventory } from '../../../database/entities/inventory.entity';
 import { Product } from '../../../database/entities/product.entity';
 import { EventsGateway } from '../../events/events.gateway';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { INVENTORY_QUEUE } from '../../queue/queue.constants';
+import { LowStockPayload } from '../../queue/queue.dto';
 
 @Injectable()
 export class InventoryService {
@@ -13,26 +17,8 @@ export class InventoryService {
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
     private readonly eventsGateway: EventsGateway,
-    private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(INVENTORY_QUEUE) private readonly inventoryQueue: Queue,
   ) { }
-
-  @OnEvent('product.activated', { async: true })
-  async handleProductActivation(payload: { productId: number; isActive: boolean; timestamp: Date }) {
-    this.logger.log(`[Inventory Consumer] Evento de activación recibido para Producto ID ${payload.productId}. Sincronizando catálogo con el almacén central...`);
-
-    // Simulation of heavy asynchronous processing or communication to another microservice (e.g., Logistics ERP)
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    this.logger.log(`[Inventory Consumer] Catálogo sincronizado exitosamente. Producto ID ${payload.productId} está listo para tener existencias gestionadas.`);
-
-    // Broadcast por WebSocket
-    this.eventsGateway.broadcast('inventory:synced', {
-      message: `El Inventario remolcó el Catálogo para el Producto ${payload.productId}. Listo para operar.`,
-      productCode: payload.productId,
-      timestamp: new Date().toISOString(),
-      action: 'SYNC_COMPLETE'
-    });
-  }
 
   async decrementStock(productId: number, quantity: number, merchantId: number) {
     // 1. Validar que el producto exista y pertenezca al merchant
@@ -43,7 +29,7 @@ export class InventoryService {
 
     // 2. Transacción de restado de Inventario (o creación si no existe)
     let inventory = await this.entityManager.findOne(Inventory, {
-      where: { product: { id: productId } as any },
+      where: { product: { id: productId } } as any,
       relations: ['product'],
     });
 
@@ -65,11 +51,14 @@ export class InventoryService {
     if (inventory.quantity <= 5) {
       this.logger.warn(`¡Alerta de Stock Crítico! Producto ${productId} ha caído a ${inventory.quantity} unidades.`);
       
-      this.eventEmitter.emit('inventory.low_stock', {
+      await this.inventoryQueue.add('inventory.low_stock', {
         productId: product.id,
         productTitle: product.title,
         remainingQuantity: inventory.quantity,
         timestamp: new Date(),
+      } as LowStockPayload, {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 1000 }
       });
     }
 

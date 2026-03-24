@@ -11,15 +11,19 @@ import { Product } from 'src/database/entities/product.entity';
 import { errorMessages } from 'src/errors/custom';
 import { validate } from 'class-validator';
 import { successObject } from 'src/common/helper/sucess-response.interceptor';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ProductVariationPrice } from '../../../database/entities/productVariation_price.entity';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { PRODUCT_QUEUE, NOTIFICATION_QUEUE } from '../../queue/queue.constants';
+import { ProductCreatedPayload, ProductActivatedPayload, PriceChangedPayload } from '../../queue/queue.dto';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectEntityManager()
     private readonly entityManager: EntityManager,
-    private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(PRODUCT_QUEUE) private readonly productQueue: Queue,
+    @InjectQueue(NOTIFICATION_QUEUE) private readonly notificationQueue: Queue,
   ) { }
 
   async getProducts() {
@@ -56,10 +60,18 @@ export class ProductService {
 
     const savedProduct = await this.entityManager.save(product);
 
-    this.eventEmitter.emit('product.created', {
+    // Fanout: Notification + Products
+    const createdPayload = {
       productId: savedProduct.id,
       categoryId: category.id,
       merchantId: merchantId,
+    } as ProductCreatedPayload;
+
+    await this.productQueue.add('product.created', createdPayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+    });
+    await this.notificationQueue.add('product.created', createdPayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
     });
 
     return savedProduct;
@@ -102,10 +114,17 @@ export class ProductService {
 
     const activatedProduct = result.raw[0];
 
-    this.eventEmitter.emit('product.activated', {
+    const activatedPayload = {
       productId: activatedProduct.id,
       isActive: activatedProduct.isActive,
       timestamp: new Date(),
+    } as ProductActivatedPayload;
+
+    await this.productQueue.add('product.activated', activatedPayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+    });
+    await this.notificationQueue.add('product.activated', activatedPayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
     });
 
     return activatedProduct;
@@ -165,12 +184,19 @@ export class ProductService {
     priceEntity.price = basePrice;
     await this.entityManager.save(ProductVariationPrice, priceEntity);
 
-    this.eventEmitter.emit('product.price_changed', {
+    const pricePayload = {
       productId: product.id,
       productTitle: product.title,
       oldPrice: previousPrice,
       newPrice: basePrice,
       timestamp: new Date(),
+    } as PriceChangedPayload;
+
+    await this.productQueue.add('product.price_changed', pricePayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
+    });
+    await this.notificationQueue.add('product.price_changed', pricePayload, {
+      attempts: 3, backoff: { type: 'exponential', delay: 1000 }
     });
 
     return { success: true, newPrice: basePrice };
