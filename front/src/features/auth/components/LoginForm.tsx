@@ -6,14 +6,19 @@ import { Loader2, Lock as LockIcon } from 'lucide-react';
 import { API_BASE_URL } from '../../../config/constants';
 
 export function LoginForm() {
-  const [email, setEmail] = useState('admin@challenge.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const setToken = useAppStore((state) => state.setToken);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Honeypot trigger: Si este campo se llena, abortamos silenciosamente asumiendo manipulación por un bot
+    if (honeypot) return;
+
     setIsLoading(true);
     setError('');
 
@@ -51,6 +56,20 @@ export function LoginForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Honeypot Field Oculto (Accesibilidad + SEO/Security Pattern) */}
+            <div className="absolute opacity-0 pointer-events-none -left-[9999px]" aria-hidden="true">
+              <label htmlFor="bot_trap">No completar este campo</label>
+              <input
+                id="bot_trap"
+                type="text"
+                name="bot_trap"
+                tabIndex={-1}
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium leading-none text-neutral-300">
                 Correo Electrónico
@@ -62,6 +81,7 @@ export function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950/60 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 transition-all"
                 placeholder="admin@challenge.com"
+                autoComplete="username"
                 required
               />
             </div>
@@ -75,7 +95,8 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950/60 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 transition-all"
-                placeholder="••••••••"
+                placeholder="password123"
+                autoComplete="current-password"
                 required
               />
             </div>
@@ -88,7 +109,7 @@ export function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-lg shadow-indigo-500/20"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
@@ -97,7 +118,7 @@ export function LoginForm() {
           </form>
         </CardContent>
         <CardFooter className="justify-center border-t border-neutral-800/50 pt-4 mt-2">
-          <p className="text-xs text-neutral-500">Seeder Credenciales Autocompletadas</p>
+          <p className="text-xs text-neutral-500">Credenciales de evaluación provistas en los placeholders.</p>
         </CardFooter>
       </Card>
     </div>
