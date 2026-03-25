@@ -2,6 +2,11 @@
 
 Este repositorio es la resolución del **Challenge Sr Fullstack (Microservicios)**, evolucionando un backend monolítico inicial en NestJS hacia una arquitectura distribuida, resiliente y orientada a eventos, acompañada de un dashboard reactivo.
 
+## 🌐 Enlaces de Producción (Live Demo)
+* **Frontend Analytics Dashboard:** [https://tecnosoftware.lautarodesouches.com/](https://tecnosoftware.lautarodesouches.com/)
+* **Backend Core API:** [https://backend-production-39cf.up.railway.app/](https://backend-production-39cf.up.railway.app/)
+> *(Nota: Las credenciales de administrador pre-cargadas para la evaluación y acceso al Dashboard son `admin@challenge.com` / `password123`)*
+
 ## 1. Problemas detectados y resueltos
 * **Dependencias Circulares y Crash del CLI:** El sistema de población de BD (Seeders) estaba fuertemente acoplado. Se migró a `DataSource` puro para inicializar los catálogos en orden jerárquico perfecto sin comprometer el Application Context de NestJS.
 * **Vulneración de Integridad:** Se agregó control estricto de tipos e Idempotencia en la siembra de base de datos.
